@@ -1,8 +1,9 @@
 import requests
 import os
-from pygments.lexer import include
 from tavily import TavilyClient
 from loguru import logger
+import re
+
 
 def get_weather(city: str) -> str:
     '''
@@ -129,3 +130,31 @@ class OpenAICompatibleClient:
             logger.error(f'调用LLM API时发生错误 - {e}')
             return "错误：调用大语言模型服务时出错。"
 
+
+def main():
+    # 1. 配置LLM
+    API_KEY = ""
+    BASE_URL = ""
+    MODEL_ID = ""
+    TAVILY_API_KEY = ""
+
+    llm = OpenAICompatibleClient(MODEL_ID, API_KEY, BASE_URL)
+
+    # 2. 初始化
+    user_prompt = "你好，请帮我查询一下今天北京的天气，然后根据天气推荐一个合适的旅游景点。"
+    prompt_history = [f'用户请求：{user_prompt}']
+
+    logger.info(f'用户输入：{user_prompt}\n' + '='*40)
+
+    # 3. 主循环
+    for i in range(5):
+        logger.info(f'--- 循环{i+1} ---\n')
+
+        full_prompt = '\n'.join(prompt_history)
+
+        llm_out = llm.generate(prompt=full_prompt, system_prompt=AGENT_SYSTEM_PROMPT)
+        logger.info(f'模型输出：\n{llm_out}\n')
+
+        prompt_history.append(llm_out)
+
+        
