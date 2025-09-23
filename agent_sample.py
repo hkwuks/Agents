@@ -144,11 +144,11 @@ def main():
     user_prompt = "你好，请帮我查询一下今天北京的天气，然后根据天气推荐一个合适的旅游景点。"
     prompt_history = [f'用户请求：{user_prompt}']
 
-    logger.info(f'用户输入：{user_prompt}\n' + '='*40)
+    logger.info(f'用户输入：{user_prompt}\n' + '=' * 40)
 
     # 3. 主循环
     for i in range(5):
-        logger.info(f'--- 循环{i+1} ---\n')
+        logger.info(f'--- 循环{i + 1} ---\n')
 
         full_prompt = '\n'.join(prompt_history)
 
@@ -157,4 +157,13 @@ def main():
 
         prompt_history.append(llm_out)
 
-        
+        action_match = re.search(r'Action: (.*)', llm_out, re.DOTALL)
+        if not action_match:
+            logger.error("解析错误：模型输出中未找到Action。")
+            break
+
+        action_str = action_match.group(1).strip()
+
+        if action_str.startswith("finish"):
+            final_answer = re.search(r'finish\(answer="(.*)"')
+        tool_name = re.search(r"(\w+)\(",ac)
