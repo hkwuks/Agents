@@ -165,5 +165,19 @@ def main():
         action_str = action_match.group(1).strip()
 
         if action_str.startswith("finish"):
-            final_answer = re.search(r'finish\(answer="(.*)"')
-        tool_name = re.search(r"(\w+)\(",ac)
+            final_answer = re.search(r'finish\(answer="(.*)"\)', action_str).group(1)
+            logger.info(f'任务完成，最终答案：{final_answer}')
+            break
+
+        tool_name = re.search(r"(\w+)\(", action_str).group(1)
+        args_str = re.search(r"\((.*)\)", action_str).group(1)
+        kwargs = dict(re.findall(r'(\w+)="([^"]*)"', args_str))
+
+        if tool_name in available_tools:
+            observation = available_tools[tool_name](**kwargs)
+        else:
+            observation = f"错误：未定义的工具 {tool_name}"
+
+        observation_str = f'Observation: {observation}'
+        logger.info(f'{observation_str}\n' + '=' * 40)
+        prompt_history.append(observation_str)
